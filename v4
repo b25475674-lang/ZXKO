@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ruby Mod Center - Neon Edition</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 15px rgba(139, 92, 246, 0.5); }
+      50% { box-shadow: 0 0 25px rgba(6, 182, 212, 0.8); }
+    }
+    .hover-card { transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .hover-card:hover { 
+      transform: translateY(-5px) scale(1.01); 
+      box-shadow: 0 10px 30px -5px rgba(6, 182, 212, 0.4);
+    }
+    .btn-animated { transition: all 0.2s ease; }
+    .btn-animated:hover { transform: scale(1.04); }
+    .btn-animated:active { transform: scale(0.96); }
+    .glow-box { animation: pulseGlow 3s infinite ease-in-out; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between antialiased selection:bg-cyan-500 selection:text-black">
+
+  <!-- Header -->
+  <header class="bg-slate-900/90 backdrop-blur border-b border-purple-900/50 sticky top-0 z-40 shadow-xl">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-gradient-to-tr from-purple-600 to-cyan-400 rounded-xl flex items-center justify-center text-xl font-bold text-black glow-box">
+          💎
+        </div>
+        <div>
+          <h1 class="text-xl font-black bg-gradient-to-r from-purple-400 via-cyan-400 to-purple-300 bg-clip-text text-transparent tracking-wider">
+            RUBY MOD CENTER
+          </h1>
+          <p class="text-[10px] text-cyan-400/80 -mt-1 font-medium">ศูนย์รวม Addon ระบบฐานข้อมูลออนไลน์</p>
+        </div>
+      </div>
+      
+      <!-- Auth Actions -->
+      <div id="auth-section" class="flex items-center gap-2">
+        <button onclick="openModal('login')" class="btn-animated bg-purple-700 hover:bg-purple-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-lg border border-purple-500/50">เข้าสู่ระบบ</button>
+        <button onclick="openModal('register')" class="btn-animated bg-cyan-600 hover:bg-cyan-500 text-black px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-lg border border-cyan-300/50">สมัครสมาชิก</button>
+      </div>
+      
+      <div id="user-section" class="hidden flex items-center gap-2.5">
+        <span id="user-badge" class="text-[10px] px-2 py-0.5 rounded-md font-extrabold uppercase tracking-wider"></span>
+        <span id="user-display-name" class="text-xs font-bold text-cyan-300 max-w-[120px] truncate"></span>
+        <button onclick="logout()" class="btn-animated bg-red-900/80 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg text-xs font-medium border border-red-700/50">ออก</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto p-4 md:p-6 w-full grow">
+    
+    <!-- Admin Form -->
+    <div id="add-mod-card" class="hidden bg-slate-900/90 p-5 rounded-2xl border border-purple-600/40 shadow-2xl mb-8 hover-card">
+      <div class="flex items-center justify-between mb-3 border-b border-purple-800/40 pb-2.5">
+        <h2 class="text-sm font-bold text-cyan-300 flex items-center gap-2">
+          <span>🚀</span> เพิ่ม Addon ใหม่เข้าสู่ระบบ (บันทึกลงเซิร์ฟเวอร์ทันที)
+        </h2>
+        <span class="text-[10px] bg-purple-950 text-purple-300 border border-purple-700 px-2 py-0.5 rounded-full font-extrabold">ADMIN CONTROL</span>
+      </div>
+
+      <form id="add-mod-form" class="space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-medium text-slate-300 mb-1">ชื่อ Addon หลัก *</label>
+            <input type="text" id="mod-title" required placeholder="เช่น Furniture Addon Ultra" class="w-full p-2.5 rounded-xl bg-slate-950 border border-purple-800/60 text-xs text-cyan-200 focus:outline-none focus:border-cyan-400">
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-slate-300 mb-1">ลิงก์ Addon หลัก (เฉพาะ Searchfox) *</label>
+            <input type="url" id="mod-link" required placeholder="https://searchfox.com/mod/..." class="w-full p-2.5 rounded-xl bg-slate-950 border border-purple-800/60 text-xs text-cyan-200 focus:outline-none focus:border-cyan-400">
+          </div>
+        </div>
+
+        <!-- Addon รถพ่วง -->
+        <div class="p-3 bg-purple-950/40 rounded-xl border border-purple-700/40">
+          <label class="block text-[11px] font-bold text-cyan-300 mb-1">🔗 รถพ่วง Addon (Resource Pack / มอดเสริมพ่วง)</label>
+          <input type="url" id="mod-trailer-link" placeholder="https://searchfox.com/mod/trailer... (ปล่อยว่างได้)" class="w-full p-2 rounded-lg bg-slate-950 border border-purple-800/60 text-xs text-cyan-200 focus:outline-none focus:border-cyan-400">
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-medium text-slate-300 mb-1">รายละเอียด *</label>
+          <textarea id="mod-desc" rows="2" required placeholder="คำอธิบายรายละเอียด Addon" class="w-full p-2.5 rounded-xl bg-slate-950 border border-purple-800/60 text-xs text-cyan-200 focus:outline-none focus:border-cyan-400"></textarea>
+        </div>
+
+        <button type="submit" id="submit-btn" class="btn-animated w-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-bold py-2.5 rounded-xl text-xs shadow-lg flex justify-center items-center gap-2">
+          ✨ บันทึกลงเซิร์ฟเวอร์
+        </button>
+      </form>
+    </div>
+
+    <!-- Mod Display Header -->
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-base font-bold border-l-4 border-cyan-400 pl-3 flex items-center gap-2 text-purple-300">
+        <span>📦</span> รายการ Addon ทั้งหมดในระบบ
+      </h2>
+      <span id="mod-count" class="text-xs bg-slate-900 px-3 py-1 rounded-full border border-purple-800/60 text-cyan-400">กำลังโหลดข้อมูล...</span>
+    </div>
+
+    <div id="mod-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+  </main>
+
+  <footer class="bg-slate-900 border-t border-purple-900/40 py-4 text-center text-[11px] text-slate-500">
+    Ruby Mod Center Neon &copy; 2026 - Online Database Connected
+  </footer>
+
+  <!-- Modal Sign In/Up -->
+  <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+    <div class="bg-slate-900 p-6 rounded-2xl border border-purple-500/50 w-full max-w-xs relative shadow-2xl">
+      <button onclick="closeModal()" class="absolute top-3 right-3 text-slate-400 hover:text-white text-base">✕</button>
+      
+      <h3 id="modal-title" class="text-base font-bold mb-1 text-cyan-300">เข้าสู่ระบบ</h3>
+      <p id="modal-subtitle" class="text-[11px] text-slate-400 mb-3">กรอกชื่อผู้ใช้และรหัสผ่านเพื่อเข้าสู่ระบบ</p>
+      
+      <form id="auth-form" class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-medium text-slate-300 mb-1">ชื่อผู้ใช้ (Username)</label>
+          <input type="text" id="auth-username" required placeholder="เช่น Tiyf_gfh" class="w-full p-2.5 rounded-xl bg-slate-950 border border-purple-800/60 text-xs text-cyan-200 focus:outline-none focus:border-cyan-400">
+        </div>
+        <div>
+          <label class="block text-[11px] font-medium text-slate-300 mb-1">รหัสผ่าน</label>
+          <input type="password" id="auth-password" required minlength="4" placeholder="••••" class="w-full p-2.5 rounded-xl bg-slate-950 border border-purple-800/60 text-xs text-cyan-200 focus:outline-none focus:border-cyan-400">
+        </div>
+
+        <div id="auth-error" class="hidden text-[11px] text-red-400 bg-red-950/60 p-2 rounded-lg border border-red-800"></div>
+
+        <button type="submit" id="auth-submit-btn" class="btn-animated w-full bg-cyan-600 hover:bg-cyan-500 text-black font-bold py-2.5 rounded-xl text-xs shadow-lg">ยืนยัน</button>
+      </form>
+
+      <div class="mt-4 pt-3 border-t border-purple-900/40 text-center">
+        <button id="toggle-auth-btn" onclick="toggleAuthMode()" class="text-[11px] text-purple-400 hover:underline">
+          ยังไม่มีบัญชี? กดสมัครสมาชิกที่นี่
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ------------------------------------------------------------------
+    // ระบบเชื่อมต่อ Cloud Database (ข้อมูลจะถูกจัดเก็บบน Cloud ไม่หายเด็ดขาด)
+    // ------------------------------------------------------------------
+    const DB_BIN_ID = "65d9e5d01f5677db05a9c9f2"; 
+    const API_URL = `https://api.jsonbin.io/v3/b/${DB_BIN_ID}`;
+    
+    // บัญชีแอดมินสูงสุด
+    const ADMIN_USER = "Tiyf_gfh";
+    const ADMIN_PASS = "vbnm1234";
+
+    let currentUser = JSON.parse(localStorage.getItem('activeUser')) || null;
+    let currentAuthMode = 'login';
+    let currentModsData = [];
+
+    // ดึงข้อมูลจาก Cloud DB
+    async function fetchModsFromCloud() {
+      const modCount = document.getElementById('mod-count');
+      modCount.innerText = "กำลังโหลดข้อมูล...";
+      try {
+        const res = await fetch(API_URL + '/latest');
+        const data = await res.json();
+        currentModsData = data.record.mods || [];
+        renderMods();
+      } catch (e) {
+        console.error(e);
+        modCount.innerText = "โหลดข้อมูลล้มเหลว";
+      }
+    }
+
+    // บันทึกข้อมูลกลับไปที่ Cloud DB
+    async function saveModsToCloud(modsArray) {
+      const submitBtn = document.getElementById('submit-btn');
+      if(submitBtn) submitBtn.innerText = "⏳ กำลังบันทึกลงเซิร์ฟเวอร์...";
+      
+      try {
+        await fetch(API_URL, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ mods: modsArray })
+        });
+        currentModsData = modsArray;
+        renderMods();
+        alert('อัปเดตข้อมูลลงเซิร์ฟเวอร์สำเร็จ!');
+      } catch (e) {
+        alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+      } finally {
+        if(submitBtn) submitBtn.innerText = "✨ บันทึกลงเซิร์ฟเวอร์";
+      }
+    }
+
+    function getUsers() {
+      return JSON.parse(localStorage.getItem('appUsers')) || {};
+    }
+
+    window.openModal = (mode) => {
+      currentAuthMode = mode;
+      updateModalUI();
+      document.getElementById('auth-error').classList.add('hidden');
+      document.getElementById('auth-modal').classList.remove('hidden');
+      document.getElementById('auth-modal').classList.add('flex');
+    };
+
+    window.closeModal = () => {
+      document.getElementById('auth-modal').classList.add('hidden');
+      document.getElementById('auth-modal').classList.remove('flex');
+    };
+
+    window.toggleAuthMode = () => {
+      currentAuthMode = currentAuthMode === 'login' ? 'register' : 'login';
+      updateModalUI();
+    };
+
+    function updateModalUI() {
+      const isLogin = currentAuthMode === 'login';
+      document.getElementById('modal-title').innerText = isLogin ? 'เข้าสู่ระบบ' : 'สมัครสมาชิกใหม่';
+      document.getElementById('modal-subtitle').innerText = isLogin ? 'กรอกชื่อผู้ใช้และรหัสผ่าน' : 'สร้างบัญชีใหม่เพื่อเข้าโหลดมอด';
+      document.getElementById('auth-submit-btn').innerText = isLogin ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก';
+      document.getElementById('toggle-auth-btn').innerText = isLogin ? 'ยังไม่มีบัญชี? กดสมัครสมาชิกที่นี่' : 'มีบัญชีอยู่แล้ว? กดเข้าสู่ระบบ';
+    }
+
+    // ระบบล็อกอิน / สมัครสมาชิก
+    document.getElementById('auth-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = document.getElementById('auth-username').value.trim();
+      const password = document.getElementById('auth-password').value;
+      const errorDiv = document.getElementById('auth-error');
+      const users = getUsers();
+
+      errorDiv.classList.add('hidden');
+
+      if (username === ADMIN_USER && password !== ADMIN_PASS) {
+        errorDiv.classList.remove('hidden');
+        errorDiv.innerText = 'รหัสผ่าน Admin ไม่ถูกต้อง!';
+        return;
+      }
+
+      if (currentAuthMode === 'register') {
+        if (users[username] || username === ADMIN_USER) {
+          errorDiv.classList.remove('hidden');
+          errorDiv.innerText = 'ชื่อผู้ใช้นี้ถูกใช้งานแล้ว';
+          return;
+        }
+        users[username] = password;
+        localStorage.setItem('appUsers', JSON.stringify(users));
+        currentUser = username;
+        localStorage.setItem('activeUser', JSON.stringify(username));
+        alert('สมัครสมาชิกสำเร็จ!');
+      } else {
+        if (username === ADMIN_USER && password === ADMIN_PASS) {
+          currentUser = ADMIN_USER;
+        } else if (!users[username] || users[username] !== password) {
+          errorDiv.classList.remove('hidden');
+          errorDiv.innerText = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+          return;
+        } else {
+          currentUser = username;
+        }
+        localStorage.setItem('activeUser', JSON.stringify(username));
+        alert('เข้าสู่ระบบสำเร็จ!');
+      }
+
+      closeModal();
+      updateUserState();
+      renderMods();
+    });
+
+    window.logout = () => {
+      currentUser = null;
+      localStorage.removeItem('activeUser');
+      updateUserState();
+      renderMods();
+    };
+
+    function updateUserState() {
+      const authSection = document.getElementById('auth-section');
+      const userSection = document.getElementById('user-section');
+      const addModCard = document.getElementById('add-mod-card');
+      const displayName = document.getElementById('user-display-name');
+      const userBadge = document.getElementById('user-badge');
+
+      if (currentUser) {
+        authSection.classList.add('hidden');
+        userSection.classList.remove('hidden');
+        userSection.classList.add('flex');
+        displayName.innerText = currentUser;
+
+        if (currentUser === ADMIN_USER) {
+          addModCard.classList.remove('hidden');
+          userBadge.innerText = "👑 ADMIN";
+          userBadge.className = "text-[10px] px-2 py-0.5 rounded-md font-extrabold bg-gradient-to-r from-purple-600 to-cyan-500 text-black shadow";
+        } else {
+          addModCard.classList.add('hidden');
+          userBadge.innerText = "MEMBER";
+          userBadge.className = "text-[10px] px-2 py-0.5 rounded-md font-extrabold bg-cyan-950 text-cyan-400 border border-cyan-800";
+        }
+      } else {
+        authSection.classList.remove('hidden');
+        userSection.classList.add('hidden');
+        addModCard.classList.add('hidden');
+      }
+    }
+
+    // เพิ่ม Addon โดย Admin
+    document.getElementById('add-mod-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (currentUser !== ADMIN_USER) return;
+
+      const title = document.getElementById('mod-title').value.trim();
+      const link = document.getElementById('mod-link').value.trim();
+      const trailerLink = document.getElementById('mod-trailer-link').value.trim();
+      const desc = document.getElementById('mod-desc').value.trim();
+
+      if (!link.toLowerCase().includes('searchfox.com')) {
+        alert('ระบบ Admin อนุญาตให้ใส่เฉพาะลิงก์จาก searchfox.com เท่านั้นครับ!');
+        return;
+      }
+
+      const newMod = {
+        id: "mod-" + Date.now(),
+        title,
+        link,
+        trailerLink,
+        desc,
+        author: currentUser
+      };
+
+      const updatedMods = [newMod, ...currentModsData];
+      await saveModsToCloud(updatedMods);
+      document.getElementById('add-mod-form').reset();
+    });
+
+    window.deleteMod = async (id) => {
+      if (currentUser !== ADMIN_USER) return;
+      if (confirm('ต้องการลบ Addon นี้ใช่หรือไม่?')) {
+        const updatedMods = currentModsData.filter(m => m.id !== id);
+        await saveModsToCloud(updatedMods);
+      }
+    };
+
+    window.handleDownload = (link) => {
+      if (!currentUser) {
+        alert('🔒 กรุณาเข้าสู่ระบบ หรือ สมัครสมาชิก ก่อนดาวน์โหลด Addon!');
+        openModal('login');
+      } else {
+        window.open(link, '_blank');
+      }
+    };
+
+    function renderMods() {
+      const modList = document.getElementById('mod-list');
+      const modCount = document.getElementById('mod-count');
+
+      modCount.innerText = `${currentModsData.length} รายการ`;
+      modList.innerHTML = '';
+
+      currentModsData.forEach((item) => {
+        const isSearchFox = item.link.toLowerCase().includes('searchfox.com');
+        const isAdmin = currentUser === ADMIN_USER;
+
+        const card = document.createElement('div');
+        card.className = 'bg-slate-900 border border-purple-900/60 p-4 rounded-2xl flex flex-col justify-between hover-card shadow-xl relative overflow-hidden';
+        
+        card.innerHTML = `
+          <div>
+            <div class="flex justify-between items-start gap-2 mb-2">
+              <h3 class="text-sm font-bold text-cyan-200 break-words">${item.title}</h3>
+              ${isSearchFox 
+                ? `<span class="text-[9px] bg-gradient-to-r from-purple-600 to-cyan-500 text-black font-black px-2 py-0.5 rounded-full shadow shrink-0">👑 SEARCHFOX</span>` 
+                : `<span class="text-[9px] bg-purple-950 text-purple-300 border border-purple-800 px-2 py-0.5 rounded shrink-0">ADDON</span>`
+              }
+            </div>
+            <p class="text-slate-300 text-xs mb-3 whitespace-pre-line leading-relaxed">${item.desc}</p>
+          </div>
+
+          <div class="pt-2.5 border-t border-purple-900/40 space-y-2">
+            <p class="text-[10px] text-slate-400 truncate">โพสต์โดย: <span class="text-cyan-400 font-semibold">${item.author}</span></p>
+            
+            ${isAdmin 
+              ? `<button onclick="deleteMod('${item.id}')" class="btn-animated w-full bg-red-950/60 hover:bg-red-600 text-red-300 hover:text-white border border-red-800/60 text-[10px] py-1 rounded-lg transition">🗑️ ลบ Addon นี้</button>` 
+              : ''
+            }
+
+            <button onclick="handleDownload('${item.link}')" class="btn-animated w-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-bold text-xs py-2 px-3 rounded-xl transition shadow-lg flex items-center justify-center gap-1.5">
+              <span>📥</span> ${currentUser ? 'ดาวน์โหลด Addon หลัก' : '🔒 ล็อกอินเพื่อดาวน์โหลด'}
+            </button>
+
+            ${item.trailerLink ? `
+              <button onclick="handleDownload('${item.trailerLink}')" class="btn-animated w-full bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/40 font-bold text-xs py-1.5 px-3 rounded-xl transition shadow flex items-center justify-center gap-1.5">
+                <span>🚛</span> ${currentUser ? 'ดาวน์โหลด Addon รถพ่วง' : '🔒 ล็อกอินเพื่อดาวน์โหลด'}
+              </button>
+            ` : ''}
+          </div>
+        `;
+
+        modList.appendChild(card);
+      });
+    }
+
+    // เรียกทำงานเมื่อโหลดหน้าเว็บ
+    updateUserState();
+    fetchModsFromCloud();
+  </script>
+</body>
+</html>
